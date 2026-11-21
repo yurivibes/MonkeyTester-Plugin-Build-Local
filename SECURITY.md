@@ -84,6 +84,6 @@ To rotate: set a new `PLUGIN_TOKEN`, restart the plugin, update the viewer's Set
 
 ## Reporting a problem
 
-Open an issue in this repo on the home Gitea
+Open an issue in this repo
 (`https://github.com/yurivibes/MonkeyTester-Plugin-Build-Local/issues`), or tell the
 owner directly for anything that should not be written down first.

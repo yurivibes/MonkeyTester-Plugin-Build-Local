@@ -1,5 +1,5 @@
 """GitHub (github.com and GitHub Enterprise Server), read-only (build-local
-source). Copied from the archived build-github adapter (forge_github.py): token
+source): token
 check, repo + default branch, branch exists, branches with paging, cases and
 build scripts from the git tree (contents-API fallback when the tree is
 truncated). No Actions, no write access needed.
