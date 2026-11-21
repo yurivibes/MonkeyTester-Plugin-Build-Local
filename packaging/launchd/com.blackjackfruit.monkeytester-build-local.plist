@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- macOS LaunchAgent, build-local plugin: builds Android and iOS on the Mac for
+     MonkeyTester's Build & Test page.
+     Replace CHECKOUT_DIR and PYTHON (any python3 >= 3.10; no extra packages),
+     copy to ~/Library/LaunchAgents/, then:
+     launchctl load ~/Library/LaunchAgents/com.blackjackfruit.monkeytester-build-local.plist
+     State (code host URL + token, build refs) lives in
+     ~/.config/monkeytester-build-local/.
+     REQUIRED: the plugin listens on the LAN (PLUGIN_HOST default 0.0.0.0) and
+     refuses to start without a pairing token. Add to EnvironmentVariables
+       <key>PLUGIN_TOKEN</key><string>(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')</string>
+     enter the same token for build-local in the viewer's Settings, and
+     chmod 600 this file (it then holds a secret). See SECURITY.md. DEVELOPER_DIR points at Xcode for xcodebuild; the signing
+     identity must be in the login keychain of the user this agent runs as
+     (LimitLoadToSessionType Aqua grants keychain access). -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.blackjackfruit.monkeytester-build-local</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>PYTHON</string>
+    <string>CHECKOUT_DIR/build_plugin.py</string>
+  </array>
+  <key>WorkingDirectory</key><string>CHECKOUT_DIR</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PLUGIN_PORT</key><string>8094</string>
+    <key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    <key>DEVELOPER_DIR</key><string>/Applications/Xcode.app/Contents/Developer</string>
+    <key>ANDROID_HOME</key><string>/Users/server/Library/Android/sdk</string>
+  </dict>
+  <key>LimitLoadToSessionType</key><string>Aqua</string>
+  <key>ProcessType</key><string>Interactive</string>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>StandardOutPath</key><string>/tmp/monkeytester-build-local.log</string>
+  <key>StandardErrorPath</key><string>/tmp/monkeytester-build-local.log</string>
+</dict>
+</plist>

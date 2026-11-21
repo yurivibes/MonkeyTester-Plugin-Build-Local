@@ -1,0 +1,25 @@
+# User unit (Linux), build-local plugin: builds Android on this host for
+# MonkeyTester's Build & Test page (Android only: no Xcode here).
+# Install:
+#   cp packaging/systemd/monkeytester-build-local.service ~/.config/systemd/user/
+#   systemctl --user daemon-reload && systemctl --user enable --now monkeytester-build-local
+# Edit WorkingDirectory to this checkout. State (code host URL + token, build refs)
+# lives in ~/.config/monkeytester-build-local/. REQUIRED, one of:
+#   Environment=PLUGIN_TOKEN=<pairing token>   (LAN bind, the default; enter the
+#                                               same token in the viewer's Settings)
+#   Environment=PLUGIN_HOST=127.0.0.1          (viewer on this host; no token needed)
+# Without either the plugin refuses to start (see SECURITY.md). Set
+#   Environment=ANDROID_HOME=<the Android SDK>
+# if the SDK is not in a location the plugin detects.
+[Unit]
+Description=MonkeyTester build-local build plugin (:8094, Android only on Linux)
+After=network-online.target
+
+[Service]
+WorkingDirectory=%h/Workspace/MonkeyTester-Build-Local
+ExecStart=/usr/bin/env nix run .
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
