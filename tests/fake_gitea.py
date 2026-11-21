@@ -1,6 +1,6 @@
 """An in-process fake Gitea (read-only API subset build-local uses).
 
-Copied from the archived build-gitea tests (fake_gitea.py) and cut down to the
+Covers the
 read-only calls: GET /user, repo, branches (paged), one branch, contents, git
 trees (paged). Response shapes follow Gitea's API (docs.gitea.com/api, swagger
 v1.27). It also records git's smart-HTTP discovery request

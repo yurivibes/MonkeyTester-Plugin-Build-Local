@@ -1,7 +1,7 @@
 # MonkeyTester-Plugin-Build-Local
 
 `build-local` is a MonkeyTester build plugin: it implements
-[BUILD_PLUGIN_API.md](BUILD_PLUGIN_API.md) (contract `monkeytester-build-plugin`,
+[BUILD_PLUGIN_API.md](https://github.com/yurivibes/MonkeyTester/blob/master/BUILD_PLUGIN_API.md) (contract `monkeytester-build-plugin`,
 version 1, kept in the MonkeyTester repo) with builds that run **on the plugin's
 own host**. The viewer's Build & Test page asks it for a repo's branches and test
 cases and to build a branch; the plugin fetches the code from Gitea or GitHub with
@@ -87,7 +87,7 @@ to any repo's `.git/config`, and passed to git only per command via environment.
    address `http://<host>:8094`, and the same pairing token as `PLUGIN_TOKEN`.
 3. Click **Configure** on the plugin and enter:
    - the **code host**: Gitea or GitHub,
-   - its **URL**: the Gitea URL (e.g. `http://192.168.125.70:3000`) or the GitHub
+   - its **URL**: the Gitea URL (e.g. `https://gitea.example.com`) or the GitHub
      API base (`https://api.github.com`, or `https://<host>/api/v3` for GitHub
      Enterprise Server),
    - a **read-only token** — it only reads the repo and fetches it with git:
@@ -141,4 +141,4 @@ doing.
 
 `python3 -m unittest discover -s tests -v` — fake Gitea, fake GitHub and a fake
 viewer, all in-process on 127.0.0.1; a real forge or viewer is never contacted.
-CI (`.gitea/workflows/test.yml`) runs the same command.
+`.gitea/workflows/test.yml` runs the same command.

@@ -1,5 +1,4 @@
-"""Gitea, read-only (build-local source). Copied from the archived build-gitea
-adapter (forge_gitea.py): token check, repo + default branch, branch exists,
+"""Gitea, read-only (build-local source): token check, repo + default branch, branch exists,
 branches with paging, cases and build scripts from the git tree. No Actions,
 no write access needed.
 
