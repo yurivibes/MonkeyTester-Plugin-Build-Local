@@ -1,4 +1,4 @@
-# Security: MonkeyTester-Build-Local
+# Security: MonkeyTester-Plugin-Build-Local
 
 `build-local` **runs the build scripts of the branches it is asked to build**. Anyone
 who can call `POST /builds` and point it at a repo the configured token can read
@@ -85,5 +85,5 @@ To rotate: set a new `PLUGIN_TOKEN`, restart the plugin, update the viewer's Set
 ## Reporting a problem
 
 Open an issue in this repo on the home Gitea
-(`http://192.168.125.70:3000/yurivibes/MonkeyTester-Build-Local/issues`), or tell the
+(`https://github.com/yurivibes/MonkeyTester-Plugin-Build-Local/issues`), or tell the
 owner directly for anything that should not be written down first.

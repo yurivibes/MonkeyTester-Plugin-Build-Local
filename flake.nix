@@ -1,5 +1,5 @@
 {
-  description = "MonkeyTester-Build-Local: MonkeyTester build plugin that builds on its own host";
+  description = "MonkeyTester-Plugin-Build-Local: MonkeyTester build plugin that builds on its own host";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
