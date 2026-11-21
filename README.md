@@ -1,4 +1,4 @@
-# MonkeyTester-Build-Local
+# MonkeyTester-Plugin-Build-Local
 
 `build-local` is a MonkeyTester build plugin: it implements
 [BUILD_PLUGIN_API.md](BUILD_PLUGIN_API.md) (contract `monkeytester-build-plugin`,
@@ -38,8 +38,8 @@ log is tail-able (`GET /builds/<ref>/log?offset=` with `X-Log-Size` /
 ### With Nix (Linux or macOS)
 
 ```sh
-git clone <the repo url>            # ssh://git@192.168.125.70:2222/yurivibes/MonkeyTester-Build-Local.git
-cd MonkeyTester-Build-Local
+git clone <the repo url>            # https://github.com/yurivibes/MonkeyTester-Plugin-Build-Local.git
+cd MonkeyTester-Plugin-Build-Local
 nix run .            # plugin on :8094
 nix run .#tests      # unit tests against the fake Gitea/GitHub
 ```
