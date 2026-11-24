@@ -1,7 +1,7 @@
 # MonkeyTester-Plugin-Build-Local
 
 `build-local` is a MonkeyTester build plugin: it implements
-[BUILD_PLUGIN_API.md](https://github.com/yurivibes/MonkeyTester/blob/master/BUILD_PLUGIN_API.md) (contract `monkeytester-build-plugin`,
+`BUILD_PLUGIN_API.md` (contract `monkeytester-build-plugin`,
 version 1, kept in the MonkeyTester repo) with builds that run **on the plugin's
 own host**. The viewer's Build & Test page asks it for a repo's branches and test
 cases and to build a branch; the plugin fetches the code from Gitea or GitHub with
@@ -38,7 +38,7 @@ log is tail-able (`GET /builds/<ref>/log?offset=` with `X-Log-Size` /
 ### With Nix (Linux or macOS)
 
 ```sh
-git clone <the repo url>            # https://github.com/yurivibes/MonkeyTester-Plugin-Build-Local.git
+git clone <repo-url> MonkeyTester-Plugin-Build-Local
 cd MonkeyTester-Plugin-Build-Local
 nix run .            # plugin on :8094
 nix run .#tests      # unit tests against the fake Gitea/GitHub
@@ -141,4 +141,4 @@ doing.
 
 `python3 -m unittest discover -s tests -v` — fake Gitea, fake GitHub and a fake
 viewer, all in-process on 127.0.0.1; a real forge or viewer is never contacted.
-`.gitea/workflows/test.yml` runs the same command.
+`nix run .#tests` and CI (`.github/workflows/test.yml`) run the same command.
