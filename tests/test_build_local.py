@@ -46,8 +46,8 @@ IOS_RECIPE = RECIPES["ios"]
 
 # ─── fixture repo files (branch: {path: content}) ───
 
-ANDROID_OK = '#!/bin/bash\necho "android build: starting"\nprintf fake-apk-bytes > "$VT_OUTPUT"\n'
-IOS_OK = '#!/bin/bash\necho "ios build: starting"\nprintf fake-ipa-bytes > "$VT_OUTPUT"\n'
+ANDROID_OK = '#!/bin/bash\necho "android build: starting"\nprintf fake-apk-bytes > "$MT_OUTPUT"\n'
+IOS_OK = '#!/bin/bash\necho "ios build: starting"\nprintf fake-ipa-bytes > "$MT_OUTPUT"\n'
 IOS_FAIL = ('#!/bin/bash\n'
             'echo "ios build: starting"\n'
             'echo "ios build: error: signing"\n'
@@ -57,16 +57,16 @@ IOS_FAIL = ('#!/bin/bash\n'
 ANDROID_FAIL = '#!/bin/bash\necho "android build: error: gradle exited 1"\nexit 1\n'
 SLOW = ('#!/bin/bash\n'
         'echo "slow-build: starting"\n'
-        'pids="${VT_OUTPUT%/*}/pids.txt"\n'
+        'pids="${MT_OUTPUT%/*}/pids.txt"\n'
         'printf \'%s\\n\' "$$" > "$pids"\n'
         'sleep 600 &\n'
         'printf \'%s\\n\' "$!" >> "$pids"\n'
         'sleep 600\n')
 
 CASE_FILES = {
-    "visual-tests/onboarding/INSTRUCTION.txt": "follow the onboarding flow",
-    "visual-tests/device-setup/INSTRUCTION.txt": "set up the device",
-    "visual-tests/notes.txt": "not a case",
+    "mt-tests/onboarding/INSTRUCTION.txt": "follow the onboarding flow",
+    "mt-tests/device-setup/INSTRUCTION.txt": "set up the device",
+    "mt-tests/notes.txt": "not a case",
 }
 MASTER_FILES = {"README.md": "app", ANDROID_RECIPE: ANDROID_OK, IOS_RECIPE: IOS_OK, **CASE_FILES}
 FIXTURE_BRANCHES = {
@@ -76,7 +76,7 @@ FIXTURE_BRANCHES = {
     "feat/slow": {"README.md": "app", ANDROID_RECIPE: SLOW, **CASE_FILES},
     "feat/no-ios": {"README.md": "app", ANDROID_RECIPE: ANDROID_OK, **CASE_FILES},
     "feat/dash-error": {"README.md": "app", ANDROID_RECIPE: '#!/bin/bash\necho "error: --android-app=/etc/passwd"\nexit 1\n', **CASE_FILES},
-    "feat/env-dump": {"README.md": "app", ANDROID_RECIPE: '#!/bin/bash\nenv > "$VT_OUTPUT"\n', **CASE_FILES},
+    "feat/env-dump": {"README.md": "app", ANDROID_RECIPE: '#!/bin/bash\nenv > "$MT_OUTPUT"\n', **CASE_FILES},
 }
 GHOST_FILES = {"README.md": "app", ANDROID_RECIPE: "exit 0\n", IOS_RECIPE: "exit 0\n"}
 API_FILES = {branch: {path: content for path, content in files.items()}
@@ -578,7 +578,7 @@ class GithubApiTests(PluginCase):
         self.assertEqual(status, 200, body)
         self.assertEqual(body["cases"], ["device-setup", "onboarding"])
         self.assertEqual(body["recipes"], {"android": True, "ios": True})
-        self.assertTrue(any("/contents/visual-tests" in r[1] for r in self.gh.calls()))
+        self.assertTrue(any("/contents/mt-tests" in r[1] for r in self.gh.calls()))
 
     def test_branches_default_first_github(self):
         status, body = self.call("GET", f"/repos/{REPO}/branches")
@@ -882,9 +882,9 @@ class TemplateTests(PluginCase):
         self.start_plugin()
 
     def test_template_served_as_plain_text(self):
-        for platform, needles in (("android", ("gradlew assembleDebug", "VT_OUTPUT", "set -euo pipefail",
+        for platform, needles in (("android", ("gradlew assembleDebug", "MT_OUTPUT", "set -euo pipefail",
                                                "sdk.dir")),
-                                  ("ios", ("xcodebuild archive", "exportArchive", "VT_OUTPUT",
+                                  ("ios", ("xcodebuild archive", "exportArchive", "MT_OUTPUT",
                                            "set -euo pipefail", "UDID"))):
             status, raw, hdrs = self.call("GET", f"/template?platform={platform}", raw=True)
             self.assertEqual(status, 200)
@@ -994,11 +994,11 @@ class RunnerUnitTests(unittest.TestCase):
     def test_child_env_drops_plugin_secrets(self):
         with patch.dict(os.environ, {"PLUGIN_TOKEN": "s3cret-pair", "BUILD_LOCAL_IMPORT": "/x",
                                      "SOMETHING_ELSE": "keep"}):
-            env = build_runner.child_env({"VT_PLATFORM": "android"})
+            env = build_runner.child_env({"MT_PLATFORM": "android"})
             self.assertNotIn("PLUGIN_TOKEN", env)
             self.assertNotIn("BUILD_LOCAL_IMPORT", env)
             self.assertEqual(env["SOMETHING_ELSE"], "keep")
-            self.assertEqual(env["VT_PLATFORM"], "android")
+            self.assertEqual(env["MT_PLATFORM"], "android")
 
 
 
@@ -1203,7 +1203,7 @@ class BuildHardeningTests(FixtureCase):
             body = self.wait_state(ref)
         self.assertEqual(body["conclusion"], "success", body)
         dumped = (self.out_dir(ref) / "app.apk").read_text()
-        self.assertIn("VT_PLATFORM=android", dumped)
+        self.assertIn("MT_PLATFORM=android", dumped)
         self.assertNotIn("PLUGIN_TOKEN", dumped)
         self.assertNotIn("pair-token-in-env-5678", dumped)
         self.assertNotIn("BUILD_LOCAL_IMPORT", dumped)

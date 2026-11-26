@@ -24,7 +24,7 @@ import re
 
 PLATFORMS = ("android", "ios")
 RECIPES = {"android": ".monkeytester/build-android.sh", "ios": ".monkeytester/build-ios.sh"}
-CASES_DIR = "visual-tests"
+CASES_DIR = "mt-tests"
 
 
 class SourceError(Exception):
@@ -45,7 +45,7 @@ CASE_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,99}$")
 
 
 def cases_from_tree(entries):
-    """Case names: visual-tests/<case>/INSTRUCTION.txt blobs in a git tree listing."""
+    """Case names: mt-tests/<case>/INSTRUCTION.txt blobs in a git tree listing."""
     cases = set()
     for entry in entries or []:
         if not isinstance(entry, dict):
