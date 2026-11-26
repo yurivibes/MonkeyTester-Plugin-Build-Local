@@ -121,6 +121,29 @@ Exit status `0` with a non-empty file at `MT_OUTPUT` is a successful build;
 anything else is a build error, reported with the script's last `error:` lines
 and its log.
 
+## Endpoints
+
+The full contract is `BUILD_PLUGIN_API.md` in the MonkeyTester repo. Every route
+except `GET /health` needs the pairing token when `PLUGIN_TOKEN` is set.
+
+| Route | Answer |
+|---|---|
+| `GET /health` | contract, plugin name/version, code host, platforms, `recipes`, capabilities; `"docs": "/docs"` while this README is readable (omitted otherwise) |
+| `GET /docs` | this README rendered as a self-contained HTML page (`text/html`, strict CSP, no scripts); 404 JSON if README.md is missing. The viewer shows it through `/plugins/docs/build-local` |
+| `GET` / `POST /config` | code host kind + URL + user and viewer URL (the token is never returned) / save them |
+| `GET /template?platform=` | example `.monkeytester/build-<platform>.sh` |
+| `GET /repos/<owner>/<repo>[?branch=]` | check a repo (and branch) |
+| `GET /repos/<owner>/<repo>/branches` | the repo's branches |
+| `GET /repos/<owner>/<repo>/cases?ref=` | test cases on a ref |
+| `POST /builds` | queue a build; `GET /builds/<ref>` its status |
+| `GET /builds/<ref>/log?offset=` | the build log from `offset` |
+| `POST /builds/<ref>/cancel` | stop a queued or running build |
+
+`/docs` reads `README.md` next to `build_plugin.py` at request time. The
+launchd/systemd units run from the checkout and the Nix flake copies every
+git-tracked file, so README.md is present in all three; an install without it
+just leaves `docs` out of `/health`.
+
 ## Security
 
 See [SECURITY.md](SECURITY.md) for the threat model, token setup (launchd
