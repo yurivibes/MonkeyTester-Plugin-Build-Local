@@ -7,6 +7,10 @@ a read-only token, fetches the branch with git, runs the app repo's
 `.monkeytester/build-<platform>.sh` here (Android and iOS on a Mac, Android
 only on Linux) and uploads the apps to the viewer with the viewer's submit.py.
 
+GET /docs serves README.md as an HTML page (docs_page.py, needs the pairing
+token like every route but /health); /health says "docs": "/docs" while
+README.md is readable.
+
 This file: HTTP routing, the pairing token, JSON errors, the config file
 (code host + token + viewer URL, mode 0600), platform detection. The build
 queue is runner.py; code host access is sources/.
@@ -55,6 +59,7 @@ from urllib.parse import parse_qs, unquote, urlparse
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import runner as runner_mod  # noqa: E402
+from docs_page import docs_html  # noqa: E402
 import sources  # noqa: E402
 from sources import PLATFORMS, RECIPES, SourceError  # noqa: E402
 
@@ -70,6 +75,9 @@ REQUEST_TIMEOUT = 60              # seconds a client may take per socket read
 LOOPBACK_NAMES = ("localhost", "localhost.", "ip6-localhost")
 VIEWER_SERVICE = "monkeytester"   # the viewer's GET /health "service"
 TEMPLATES = Path(__file__).resolve().parent / "templates"
+README_PATH = Path(__file__).resolve().parent / "README.md"   # GET /docs, read per request
+DOCS_CSP = ("default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; "
+            "form-action 'none'; frame-ancestors 'none'")
 
 # owner/repo; neither part may be only dots.
 REPO_PART_RE = re.compile(r"^(?!\.+$)[A-Za-z0-9_.-]{1,100}$")
@@ -320,6 +328,8 @@ class Plugin:
             "capabilities": list(CAPABILITIES),
             "error": error,
         }
+        if docs_available():
+            body["docs"] = "/docs"
         if not full:
             body["forge"] = {"kind": src.KIND, "label": src.LABEL}
             body["auth_required"] = True
@@ -441,6 +451,21 @@ class Plugin:
         return body
 
 
+def docs_available():
+    """True when README.md can be read: /health then advertises GET /docs."""
+    path = README_PATH
+    return path.is_file() and os.access(path, os.R_OK)
+
+
+def docs_page():
+    """GET /docs: README.md rendered as a self-contained HTML page (bytes)."""
+    try:
+        text = README_PATH.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        raise PluginError("no documentation: README.md is not readable", "not_found") from None
+    return docs_html(PLUGIN_NAME, text, PLUGIN_VERSION)
+
+
 def template_text(platform):
     if platform not in PLATFORMS:
         raise PluginError("platform must be one of: " + ", ".join(PLATFORMS))
@@ -475,6 +500,16 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Cache-Control", "no-store")
         for k, v in (headers or {}).items():
             self.send_header(k, v)
+        self.end_headers()
+        self.wfile.write(data)
+
+    def send_html(self, status, data):
+        self.send_response(status)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(data)))
+        self.send_header("Content-Security-Policy", DOCS_CSP)
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("Cache-Control", "no-store")
         self.end_headers()
         self.wfile.write(data)
 
@@ -545,6 +580,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send_json(200, public_config(p.config.load()))
             if method == "POST":
                 return self.send_json(200, p.save_config(self.read_body()))
+        elif parts == ["docs"] and method == "GET":
+            return self.send_html(200, docs_page())
         elif parts == ["template"] and method == "GET":
             return self.send_text(200, template_text(query.get("platform") or ""))
         elif parts == ["builds"] and method == "POST":

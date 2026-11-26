@@ -363,7 +363,7 @@ class HealthAuthTests(PluginCase):
                              ("GET", f"/repos/{REPO}"), ("GET", f"/repos/{REPO}/branches"),
                              ("GET", f"/repos/{REPO}/cases?ref=master"), ("POST", "/builds"),
                              ("GET", "/builds/br_0123456789abcdef"), ("GET", "/builds/br_0123456789abcdef/log"),
-                             ("POST", "/builds/br_0123456789abcdef/cancel")):
+                             ("POST", "/builds/br_0123456789abcdef/cancel"), ("GET", "/docs")):
             for headers in ({"X-Plugin-Token": ""}, {"X-Plugin-Token": "wrong"},
                             {"X-Plugin-Token": "", "Authorization": "Bearer wrong"}):
                 status, body = self.call(method, path, {} if method == "POST" else None, headers=headers)
@@ -373,6 +373,48 @@ class HealthAuthTests(PluginCase):
         status, _ = self.call("GET", "/config", headers={"X-Plugin-Token": "",
                                                          "Authorization": f"Bearer {self.pairing_token}"})
         self.assertEqual(status, 200)
+
+
+class DocsTests(PluginCase):
+    """GET /docs renders README.md; /health advertises it only when readable."""
+
+    pairing_token = PAIR
+
+    def setUp(self):
+        super().setUp()
+        self.start_plugin()
+
+    def test_docs_renders_the_readme(self):
+        status, raw, headers = self.call("GET", "/docs", raw=True)
+        self.assertEqual(status, 200)
+        self.assertEqual(headers["Content-Type"], "text/html; charset=utf-8")
+        self.assertEqual(headers["Content-Security-Policy"],
+                         "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; "
+                         "form-action 'none'; frame-ancestors 'none'")
+        self.assertEqual(headers["X-Content-Type-Options"], "nosniff")
+        self.assertEqual(headers["Cache-Control"], "no-store")
+        page = raw.decode()
+        self.assertIn('<h1 id="monkeytester-plugin-build-local">MonkeyTester-Plugin-Build-Local</h1>', page)
+        self.assertIn(f"build-local {build_plugin.PLUGIN_VERSION}", page)
+        self.assertNotIn("<script", page)
+
+    def test_docs_needs_the_pairing_token(self):
+        status, body = self.call("GET", "/docs", headers={"X-Plugin-Token": "wrong"})
+        self.assertEqual((status, body.get("code")), (401, "unauthorized"))
+
+    def test_health_advertises_docs(self):
+        for token in (PAIR, ""):   # full and token-less body alike
+            status, body = self.call("GET", "/health", headers={"X-Plugin-Token": token})
+            self.assertEqual(status, 200)
+            self.assertEqual(body["docs"], "/docs")
+
+    def test_missing_readme_hides_docs_and_404s(self):
+        with patch.object(build_plugin, "README_PATH", self.dir / "no-such-README.md"):
+            status, body = self.call("GET", "/health")
+            self.assertEqual(status, 200)
+            self.assertNotIn("docs", body)
+            status, body = self.call("GET", "/docs")
+            self.assertEqual((status, body.get("code")), (404, "not_found"))
 
 
 class ConfigTests(PluginCase):
