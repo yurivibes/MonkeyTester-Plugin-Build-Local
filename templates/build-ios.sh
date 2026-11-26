@@ -6,13 +6,13 @@
 # being built, on the plugin's Mac (Xcode, and the signing identity in the
 # login keychain of the user the plugin runs as):
 #
-#   VT_PLATFORM    ios
-#   VT_OUTPUT      where this script must write the signed .ipa
-#   VT_BRANCH      the branch being built
-#   VT_CASES       comma-separated test case names (empty: every case)
-#   VT_REQUEST_ID  the viewer's build id
+#   MT_PLATFORM    ios
+#   MT_OUTPUT      where this script must write the signed .ipa
+#   MT_BRANCH      the branch being built
+#   MT_CASES       comma-separated test case names (empty: every case)
+#   MT_REQUEST_ID  the viewer's build id
 #
-# Exit 0 with a non-empty file at $VT_OUTPUT = built. Anything else is a build
+# Exit 0 with a non-empty file at $MT_OUTPUT = built. Anything else is a build
 # error: the plugin reports the output's last "error:" lines (xcodebuild's
 # "error: ..." lines, e.g. signing) and attaches the whole output as the build
 # log, and the iPhones show every test as Unavailable. Android is still built
@@ -31,9 +31,9 @@
 # phone connected) before its first build.
 set -euo pipefail
 
-: "${VT_OUTPUT:?VT_OUTPUT is not set (this script is run by build-local)}"
+: "${MT_OUTPUT:?MT_OUTPUT is not set (this script is run by build-local)}"
 
-out=build/visual-test
+out=build/monkeytester
 mkdir -p "$out"
 
 # BUILD: archive, then export a signed .ipa. Replace project, scheme and
@@ -57,4 +57,4 @@ if [ -z "$ipa" ]; then
   echo "error: xcodebuild exported no .ipa" >&2
   exit 1
 fi
-cp "$ipa" "$VT_OUTPUT"
+cp "$ipa" "$MT_OUTPUT"

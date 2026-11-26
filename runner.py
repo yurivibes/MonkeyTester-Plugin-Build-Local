@@ -5,8 +5,8 @@ Per build (BUILD_PLUGIN_API.md, POST /builds):
      (shallow, credentials per command through GIT_CONFIG_* env: never in
      .git/config, the remote URL, argv or the log),
   2. run each chosen platform's recipe (`bash .monkeytester/build-<p>.sh`) in its
-     own process group with VT_PLATFORM / VT_OUTPUT / VT_BRANCH / VT_CASES /
-     VT_REQUEST_ID, under a per-platform timeout,
+     own process group with MT_PLATFORM / MT_OUTPUT / MT_BRANCH / MT_CASES /
+     MT_REQUEST_ID, under a per-platform timeout,
   3. upload through the viewer's submit.py (`--no-wait`): built apps, and the
      error + log of the platforms that failed.
 
@@ -445,11 +445,11 @@ class Runner:
             self._job(ref, p, "in_progress")
             app = out / APP_NAMES[p]
             plog = out / f"{p}-build.log"
-            note(f"{JOB_NAMES[p]}: bash {RECIPES[p]} (VT_OUTPUT={app})")
+            note(f"{JOB_NAMES[p]}: bash {RECIPES[p]} (MT_OUTPUT={app})")
             timeout = platform_timeout(p)
-            env = child_env({"VT_PLATFORM": p, "VT_OUTPUT": str(app), "VT_BRANCH": branch,
-                             "VT_CASES": ",".join(rec.get("cases") or []),
-                             "VT_REQUEST_ID": rec["request_id"]})
+            env = child_env({"MT_PLATFORM": p, "MT_OUTPUT": str(app), "MT_BRANCH": branch,
+                             "MT_CASES": ",".join(rec.get("cases") or []),
+                             "MT_REQUEST_ID": rec["request_id"]})
             with open(plog, "ab") as pf:
                 rc, outcome = self._run(["bash", RECIPES[p]], checkout, env, [logf, pf], timeout)
             if outcome == "timeout":
@@ -460,7 +460,7 @@ class Runner:
                 msg = build_error_message(plog)
                 if not msg:
                     msg = (f"build script exited with status {rc}" if rc != 0
-                           else "build script exited with status 0 but wrote no app at VT_OUTPUT")
+                           else "build script exited with status 0 but wrote no app at MT_OUTPUT")
             if msg:
                 failed[p] = (msg, plog)
                 note(f"{JOB_NAMES[p]}: failed: {msg}")
@@ -563,7 +563,7 @@ class Runner:
         # starting with "-" (an error line) can't be taken for another option.
         for p, (msg, plog) in failed.items():
             argv += [f"--{p}-build-error={msg}", f"--{p}-build-log", str(plog)]
-        argv += ["--tests-dir", "visual-tests", f"--branch={rec['branch']}", f"--repo={rec['repo']}",
+        argv += ["--tests-dir", "mt-tests", f"--branch={rec['branch']}", f"--repo={rec['repo']}",
                  f"--cases={','.join(rec.get('cases') or [])}", f"--build-request={rec['request_id']}",
                  "--timeout", str(SUBMIT_WAIT)]
         note("Upload: python3 submit.py " + " ".join(argv[3:]))

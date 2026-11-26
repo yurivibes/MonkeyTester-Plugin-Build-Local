@@ -228,7 +228,7 @@ def _branch_commit(cfg, repo, ref):
 
 
 def _cases_from_contents(cfg, repo, sha):
-    """Fallback when the recursive tree is truncated: list visual-tests/ and check
+    """Fallback when the recursive tree is truncated: list mt-tests/ and check
     each folder for INSTRUCTION.txt through the contents API."""
     status, payload = _call(cfg, "GET", f"/repos/{repo}/contents/{CASES_DIR}", params={"ref": sha})
     if status == 404:

@@ -5,13 +5,13 @@
 # build-local runs it with bash from the root of a clean checkout of the branch
 # being built, on the plugin's own host (a Mac, or Linux with the Android SDK):
 #
-#   VT_PLATFORM    android
-#   VT_OUTPUT      where this script must write the .apk
-#   VT_BRANCH      the branch being built
-#   VT_CASES       comma-separated test case names (empty: every case)
-#   VT_REQUEST_ID  the viewer's build id
+#   MT_PLATFORM    android
+#   MT_OUTPUT      where this script must write the .apk
+#   MT_BRANCH      the branch being built
+#   MT_CASES       comma-separated test case names (empty: every case)
+#   MT_REQUEST_ID  the viewer's build id
 #
-# Exit 0 with a non-empty file at $VT_OUTPUT = built. Anything else is a build
+# Exit 0 with a non-empty file at $MT_OUTPUT = built. Anything else is a build
 # error: the plugin reports the output's last "error:" lines and attaches the
 # whole output as the build log, and the Android devices show every test as
 # Unavailable.
@@ -21,7 +21,7 @@
 #   - the APK path (app/build/outputs/apk/debug/app-debug.apk).
 set -euo pipefail
 
-: "${VT_OUTPUT:?VT_OUTPUT is not set (this script is run by build-local)}"
+: "${MT_OUTPUT:?MT_OUTPUT is not set (this script is run by build-local)}"
 
 # The Android SDK: $ANDROID_HOME / $ANDROID_SDK_ROOT, else the usual places on
 # macOS and Linux. Gradle reads it from local.properties.
@@ -43,4 +43,4 @@ if [ ! -s "$apk" ]; then
   echo "error: Gradle produced no APK at $apk" >&2
   exit 1
 fi
-cp "$apk" "$VT_OUTPUT"
+cp "$apk" "$MT_OUTPUT"

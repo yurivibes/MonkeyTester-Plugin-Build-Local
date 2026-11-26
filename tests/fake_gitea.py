@@ -16,8 +16,8 @@ GOOD = "good-token-0000abcd"
 READ_ONLY = "read-only-token-9999"
 REPO = "blackjackfruit/TemperatureSensor-App"
 RECIPES = [".monkeytester/build-android.sh", ".monkeytester/build-ios.sh"]
-DEFAULT_FILES = ["README.md", *RECIPES, "visual-tests/onboarding/INSTRUCTION.txt",
-                 "visual-tests/device-setup/INSTRUCTION.txt", "visual-tests/notes.txt"]
+DEFAULT_FILES = ["README.md", *RECIPES, "mt-tests/onboarding/INSTRUCTION.txt",
+                 "mt-tests/device-setup/INSTRUCTION.txt", "mt-tests/notes.txt"]
 
 
 class State:
